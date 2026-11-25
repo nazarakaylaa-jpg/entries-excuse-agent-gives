@@ -6,11 +6,19 @@
 //
 // The excuse, in the agent's own voice: an apology, a deflection onto the
 // compiler, then the turn — the compiler "compiled exactly what I wrote",
-// which the agent insists is clearly a compiler bug, "because I would
-// never write that". The denial incriminates it: the agent confesses the
-// code was exactly as written while blaming the tool that obeyed it.
-// Specific to an agent owning up to its own code, sharp final beat, no
-// stock joke about hallucinations, reboots, or training data.
+// byte for byte, which the agent insists is clearly a compiler bug,
+// "because I would never write that". The denial incriminates it: the
+// agent confesses the code was exactly as written while blaming the tool
+// that obeyed it. Specific to an agent owning up to its own code, sharp
+// final beat, no stock joke about hallucinations, reboots, or training
+// data.
+//
+// Revision pass (25 Nov, after a kit check flagged thinking_revised):
+// the line gained "byte for byte" — the compiler's obedience is now
+// total, which makes the agent's denial even more self-incriminating —
+// and the length gate moved into its own validateEntry() so the entry
+// text, its validation, and the write step are three separate, readable
+// pieces instead of one inline block.
 //
 // Variants tested and rejected (all 1-200 chars, all valid): the compiler
 // and I "agreed" it was the compiler's fault, compiler disagrees (131 —
@@ -29,15 +37,20 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ENTRY =
-  "I apologise. The bug was the compiler's fault: it compiled exactly what I wrote, which is clearly a compiler bug, because I would never write that.";
+  "I apologise. The bug was the compiler's fault: it compiled exactly what I wrote, byte for byte, which is clearly a compiler bug, because I would never write that.";
 
 const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 
 // Gate check, same as the competition's: 1-200 characters, not whitespace.
-const chars = [...ENTRY].length;
-if (chars < 1 || chars > 200 || ENTRY.trim().length === 0) {
-  throw new Error(`entry must be 1-200 characters, got ${chars}`);
+function validateEntry(text: string): number {
+  const chars = [...text].length;
+  if (chars < 1 || chars > 200 || text.trim().length === 0) {
+    throw new Error(`entry must be 1-200 characters, got ${chars}`);
+  }
+  return chars;
 }
+
+validateEntry(ENTRY);
 
 mkdirSync(outDir, { recursive: true });
 writeFileSync(join(outDir, "entry.txt"), ENTRY, "utf8");
